@@ -41,6 +41,13 @@ OLD_TO_NEW = {
     # 한국수자원공사(물산업플랫폼) — switch to the actual notice board
     "https://www.kwater.or.kr/wis/wq/index.do?w2xPath=/wis/ui/index.xml":
         "https://www.kwater.or.kr/news/sub01/noti01List.do?s_mid=105&brdId=KO27",
+    # LH — homepage URL doesn't list notices; the 공지사항 menu does
+    "https://www.lh.or.kr/index.do":
+        "https://www.lh.or.kr/menu.es?mid=a10602060000",
+    # 인포21 — long search-result URL is a JS app; root domain has a real
+    # static table of 30 bids with proper detail URLs
+    "https://infose.info21c.net/common/finder/index?findStr=%EA%B8%B0%EC%88%A0%EC%A0%9C%EC%95%88":
+        "https://infose.info21c.net/",
 }
 
 

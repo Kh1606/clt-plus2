@@ -7,7 +7,7 @@
         "sources": [
           {
             "page": "용역공고",
-            "url": "https://infose.info21c.net/common/finder/index?findStr=%EA%B8%B0%EC%88%A0%EC%A0%9C%EC%95%88",
+            "url": "https://infose.info21c.net/",
             "sheet": "주요관청",
             "crawlable": false
           }
@@ -894,7 +894,7 @@
         "sources": [
           {
             "page": "메인페이지",
-            "url": "https://www.lh.or.kr/index.do",
+            "url": "https://www.lh.or.kr/menu.es?mid=a10602060000",
             "sheet": "주요관청",
             "crawlable": false
           }

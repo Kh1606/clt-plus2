@@ -132,6 +132,8 @@ SCRAPERS = [
     "scrapers.gongsa.gongsa_batch",
     "scrapers.gongsa.gongsa_web_batch",
     "scrapers.gongsa.kwater_notice",
+    "scrapers.gongsa.lh_notice",
+    "scrapers.gongsa.info21c",
     # 제주도 (3 of 4 — 서귀포시청 returns empty initial HTML)
     "scrapers.jeju.jeju_do",
     "scrapers.jeju.jeju_si",
