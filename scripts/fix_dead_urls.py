@@ -48,6 +48,14 @@ OLD_TO_NEW = {
     # static table of 30 bids with proper detail URLs
     "https://infose.info21c.net/common/finder/index?findStr=%EA%B8%B0%EC%88%A0%EC%A0%9C%EC%95%88":
         "https://infose.info21c.net/",
+    # 천안시 행정공고/고시 — old /kor/sub02_03_01.do is empty CMS page;
+    # the real saeol gosi list lives at /prog/saeolGosi/GOSI/kor/sub02_02_01/list.do
+    "https://www.cheonan.go.kr/kor/sub02_03_01.do":
+        "https://www.cheonan.go.kr/prog/saeolGosi/GOSI/kor/sub02_02_01/list.do",
+    # 천안시 공지사항 — old BBSMSTR_000000000462 returns 404;
+    # the real 공지사항 BBSMSTR id is _000000000450
+    "https://www.cheonan.go.kr/cop/bbs/BBSMSTR_000000000462/selectBoardList.do":
+        "https://www.cheonan.go.kr/bbs/BBSMSTR_000000000450/list.do",
 }
 
 

@@ -53,6 +53,7 @@ SCRAPERS = [
     "scrapers.chungcheongnam.chungnam_batch",
     "scrapers.chungcheongnam.chungnam_eminwon",
     "scrapers.chungcheongnam.chungnam_sap",
+    "scrapers.chungcheongnam.cheonan_si",
     # 충청북도
     "scrapers.chungcheongbuk.chungbuk_batch",
     "scrapers.chungcheongbuk.chungbuk_web_batch",
