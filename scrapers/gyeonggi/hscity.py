@@ -11,9 +11,13 @@ from scrapers.base import Notice, SourceMeta, get, soup, clean, parse_date
 
 _SRC = SourceMeta(
     region="경기도", sub_entity="화성시청", source_page="공고 고시",
+    # Full query string matches version2.xlsx exactly so the v2 allowlist
+    # normalization recognizes it; trailing empty params are functionally
+    # no-ops to the server but make the URL hash-stable.
     source_url=(
         "https://www.hscity.go.kr/www/gosi/BD_selectGosiList.do"
-        "?q_cp=1&q_notAncmtSeCode=04&q_rowPerPage=10&q_currPage=1"
+        "?q_cp=1&q_notAncmtSeCode=04&q_notAncmtMgtNo=&q_sc=&q_depNm=&q_sv="
+        "&q_rowPerPage=10&q_currPage=1&q_sortName=&q_sortOrder="
     ),
 )
 _DETAIL_BASE = "https://www.hscity.go.kr/www/gosi/BD_selectGosiDetail.do?q_notAncmtMgtNo="

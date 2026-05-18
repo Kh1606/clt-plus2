@@ -19,10 +19,12 @@ OUT = ROOT / ".scrape-log" / "v2_results.txt"
 def norm(url: str) -> str:
     if not url:
         return ""
+    import html
+    s = html.unescape(url.strip())
     try:
-        p = urlsplit(url.strip())
+        p = urlsplit(s)
     except Exception:
-        return url.strip()
+        return s
     path = p.path.rstrip("/") or "/"
     return urlunsplit(("https", p.netloc.lower(), path, p.query, ""))
 
