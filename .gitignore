@@ -22,3 +22,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# Downloaded scrape-log artifacts (per-run, regeneratable)
+.scrape-log/
