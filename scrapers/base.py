@@ -108,20 +108,54 @@ def _legacy_session() -> requests.Session:
     return s
 
 
+# Retry transient failures (gov.kr sites are routinely flaky — connect timeouts,
+# resets, 502/503/504). Stays cheap: only 2 retries with a small fixed backoff.
+_TRANSIENT_EXC = (
+    requests.exceptions.ConnectTimeout,
+    requests.exceptions.ReadTimeout,
+    requests.exceptions.ConnectionError,
+    requests.exceptions.ChunkedEncodingError,
+)
+_TRANSIENT_STATUS = {429, 500, 502, 503, 504}
+
+
+def _retrying_get(do_get, url: str, *, retries: int = 2, backoff: float = 3.0):
+    last_exc = None
+    for attempt in range(retries + 1):
+        try:
+            r = do_get()
+            if r.status_code in _TRANSIENT_STATUS and attempt < retries:
+                time.sleep(backoff * (attempt + 1))
+                continue
+            r.raise_for_status()
+            return r
+        except _TRANSIENT_EXC as e:
+            last_exc = e
+            if attempt < retries:
+                time.sleep(backoff * (attempt + 1))
+                continue
+            raise
+    raise last_exc  # unreachable but keeps type checkers quiet
+
+
 def ssl_get(url: str, **kw) -> requests.Response:
-    """GET with legacy TLS for sites that reject modern cipher/handshake."""
-    r = _legacy_session().get(url, timeout=20, **kw)
-    r.raise_for_status()
-    return r
+    """GET with legacy TLS for sites that reject modern cipher/handshake.
+    Retries up to 2x on transient connect/read errors and 5xx responses.
+    """
+    sess = _legacy_session()
+    return _retrying_get(lambda: sess.get(url, timeout=20, **kw), url)
 
 
 def get(url: str, *, session: requests.Session | None = None, **kw) -> requests.Response:
-    """GET wrapper with sensible defaults; per-site can pass extra cookies/headers."""
+    """GET wrapper with sensible defaults; per-site can pass extra cookies/headers.
+    Retries up to 2x on transient connect/read errors and 5xx responses.
+    """
     s = session or requests
     headers = {**DEFAULT_HEADERS, **kw.pop("headers", {})}
-    r = s.get(url, timeout=20, headers=headers, verify=False, **kw)
-    r.raise_for_status()
-    return r
+    return _retrying_get(
+        lambda: s.get(url, timeout=20, headers=headers, verify=False, **kw),
+        url,
+    )
 
 
 def soup(html: str | bytes) -> BeautifulSoup:
