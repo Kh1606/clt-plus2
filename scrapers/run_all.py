@@ -59,6 +59,7 @@ SCRAPERS = [
     "scrapers.chungcheongbuk.cheongju_eminwon",
     # 경기도
     "scrapers.gyeonggi.gyeonggi_batch",
+    "scrapers.gyeonggi.gyeonggi_pw_batch",
     # 전라북도
     "scrapers.jeonbuk.jeonbuk_batch",
     "scrapers.jeonbuk.jeonbuk_list_batch",
