@@ -56,6 +56,14 @@ OLD_TO_NEW = {
     # the real 공지사항 BBSMSTR id is _000000000450
     "https://www.cheonan.go.kr/cop/bbs/BBSMSTR_000000000462/selectBoardList.do":
         "https://www.cheonan.go.kr/bbs/BBSMSTR_000000000450/list.do",
+    # 남양주시청 고시 공고 — old /main/185 redirects to tracer;
+    # real eminwon-web list URL provided by user
+    "https://www.nyj.go.kr/main/185":
+        "https://www.nyj.go.kr/www/selectEminwonWebList.do?key=2492&sa1=01&sa1=02&sa1=04&sa1=05&sc4=2024",
+    # 경상북도 북부건설사업소 고시 공고 — old open_contents URL is about:blank;
+    # real economy/page.do URL provided by user
+    "https://gb.go.kr/Main/open_contents/section/gunsul/page.do?mnu_uid=6046&":
+        "https://gb.go.kr/Main/economy/page.do?mnu_uid=15445&LARGE_CODE=1070&MEDIUM_CODE=110&SMALL_CODE=30&SMALL_CODE2=20",
 }
 
 

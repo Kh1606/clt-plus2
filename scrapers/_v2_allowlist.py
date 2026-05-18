@@ -20,7 +20,7 @@ def norm(url: str) -> str:
 V2_ALLOWLIST: frozenset[str] = frozenset({
     'https://announce.incheon.go.kr/citynet/jsp/sap/SAPGosiBizProcess.do?command=searchList&flag=gosiGL&svp=Y&sido=ic',
     'https://cis.seoul.go.kr/TotalAlimi_new/Notice.action',
-    'https://gb.go.kr/Main/open_contents/section/gunsul/page.do?mnu_uid=6046&',
+    'https://gb.go.kr/Main/economy/page.do?mnu_uid=15445&LARGE_CODE=1070&MEDIUM_CODE=110&SMALL_CODE=30&SMALL_CODE2=20',
     'https://infose.info21c.net/',
     'https://newtech.gg.go.kr/main/pblanNow.do',
     'https://singisul.daegu.go.kr/index.do?menu_id=00000880',
@@ -91,7 +91,7 @@ V2_ALLOWLIST: frozenset[str] = frozenset({
     'https://www.molit.go.kr/srocm/USR/BORD0201/m_13078/BRD.jsp',
     'https://www.molit.go.kr/srocm/USR/BORD0201/m_19696/LST.jsp',
     'https://www.molit.go.kr/wrocm/USR/BORD0201/m_15959/BRD.jsp',
-    'https://www.nyj.go.kr/main/185',
+    'https://www.nyj.go.kr/www/selectEminwonWebList.do?key=2492&sa1=01&sa1=02&sa1=04&sa1=05&sc4=2024',
     'https://www.osan.go.kr/portal/saeol/gosi/list.do?mId=0302010000',
     'https://www.pyeongtaek.go.kr/pyeongtaek/saeol/gosi/list.do?seCode=01&mid=0401020000',
     'https://www.sdco.or.kr/board.es?mid=a10601020000&bid=0007',

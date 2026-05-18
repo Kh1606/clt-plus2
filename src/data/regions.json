@@ -444,7 +444,7 @@
         "sources": [
           {
             "page": "고시 공고",
-            "url": "https://www.nyj.go.kr/main/185",
+            "url": "https://www.nyj.go.kr/www/selectEminwonWebList.do?key=2492&sa1=01&sa1=02&sa1=04&sa1=05&sc4=2024",
             "sheet": "주요관청",
             "crawlable": false
           }
@@ -703,7 +703,7 @@
         "sources": [
           {
             "page": "고시 공고",
-            "url": "https://gb.go.kr/Main/open_contents/section/gunsul/page.do?mnu_uid=6046&",
+            "url": "https://gb.go.kr/Main/economy/page.do?mnu_uid=15445&LARGE_CODE=1070&MEDIUM_CODE=110&SMALL_CODE=30&SMALL_CODE2=20",
             "sheet": "주요관청",
             "crawlable": false
           }

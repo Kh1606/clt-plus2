@@ -71,6 +71,7 @@ SCRAPERS = [
     "scrapers.gyeonggi.newtech_gg",
     "scrapers.gyeonggi.calspia",
     "scrapers.gyeonggi.yongin_si",
+    "scrapers.gyeonggi.namyangju_si",
     # 전라북도
     "scrapers.jeonbuk.jeonbuk_batch",
     "scrapers.jeonbuk.jeonbuk_list_batch",
@@ -128,6 +129,7 @@ SCRAPERS = [
     "scrapers.sejong.sejong_batch",
     # 경상북도 (9 of 38 — most are JS-rendered portal/saeol or open_content)
     "scrapers.gyeongsangbuk.gyeongbuk_batch",
+    "scrapers.gyeongsangbuk.bukbu_construction",
     # 경상남도 (9 of 32 static + 21 .web Playwright)
     "scrapers.gyeongsangnam.gyeongnam_batch",
     "scrapers.gyeongsangnam.gyeongnam_web_batch",
@@ -140,6 +142,7 @@ SCRAPERS = [
     "scrapers.gongsa.kwater_notice",
     "scrapers.gongsa.lh_notice",
     "scrapers.gongsa.info21c",
+    "scrapers.gongsa.ex_kr",
     # 제주도 (3 of 4 — 서귀포시청 returns empty initial HTML)
     "scrapers.jeju.jeju_do",
     "scrapers.jeju.jeju_si",
