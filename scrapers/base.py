@@ -66,7 +66,12 @@ class Notice:
     scraped_at: str = field(init=False)
 
     def __post_init__(self):
-        self.notice_id = hashlib.sha1(self.detail_url.encode("utf-8")).hexdigest()
+        # Composite id: same article surfaced under two different sub_entities
+        # (e.g. citywide eminwon iframe linked from each district page) must
+        # produce distinct rows so the UI's (region, sub_entity) filter
+        # doesn't lose one to upsert collision.
+        key = f"{self.sub_entity}|{self.detail_url}".encode("utf-8")
+        self.notice_id = hashlib.sha1(key).hexdigest()
         self.scraped_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     def asdict(self) -> dict:

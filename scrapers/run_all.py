@@ -51,9 +51,11 @@ SCRAPERS = [
     # 충청남도
     "scrapers.chungcheongnam.asan",
     "scrapers.chungcheongnam.chungnam_batch",
+    "scrapers.chungcheongnam.chungnam_eminwon",
     # 충청북도
     "scrapers.chungcheongbuk.chungbuk_batch",
     "scrapers.chungcheongbuk.chungbuk_web_batch",
+    "scrapers.chungcheongbuk.cheongju_eminwon",
     # 경기도
     "scrapers.gyeonggi.gyeonggi_batch",
     # 전라북도
@@ -185,10 +187,15 @@ def main():
                 notices = [n for n in notices if v2_norm(n.source_url) in V2_ALLOWLIST]
                 dropped_non_v2 += before - len(notices)
                 # Reconcile metadata to v2's regions.json labels so UI queries match.
+                # Notice.notice_id depends on sub_entity (composite hash), so recompute.
+                import hashlib as _h
                 for n in notices:
                     meta = V2_META.get(v2_norm(n.source_url))
                     if meta and (n.region, n.sub_entity, n.source_page) != meta:
                         n.region, n.sub_entity, n.source_page = meta
+                        n.notice_id = _h.sha1(
+                            f"{n.sub_entity}|{n.detail_url}".encode("utf-8")
+                        ).hexdigest()
                         patched_meta += 1
                 count = stdout_sink.write(notices)
                 if json_sink:
