@@ -134,20 +134,33 @@ export default function KoreaMap({
   }, [countsBySub, selectedRegionName])
   const subColorScale = useMemo(() => makeColorScale(maxSubCount), [maxSubCount])
 
-  const handleProvinceClick = (geo) => {
+  const handleProvinceClick = (geo, event) => {
+    event?.stopPropagation?.()
     const regionName = geoNameToRegion(geo.properties.name)
     const centroid = geoCentroid(geo)
     setSelectedProvince({ code: geo.properties.code, centroid })
     onPickRegion?.(regionName)
   }
 
-  const handleMunicipalityClick = (geo) => {
+  const handleMunicipalityClick = (geo, event) => {
+    event?.stopPropagation?.()
     if (!selectedRegionName || !subLookup) return
     const subName = subLookup.match(geo.properties.name)
-    // Only react when the click maps to an actual v2 sub-entity. Clicks on
-    // inactive (gray) sub-regions do nothing — the user can still click
-    // back to province level via "전국 보기".
-    if (subName) onPickSub?.(selectedRegionName, subName)
+    if (subName) {
+      onPickSub?.(selectedRegionName, subName)
+    } else {
+      // Flash a hint so the user knows the click WAS registered but there
+      // are no notices for this sub-region.
+      setHover({
+        x: event?.clientX ?? 0,
+        y: event?.clientY ?? 0,
+        label: geo.properties.name,
+        count: null,
+        hint: '연동된 공지가 없어요',
+      })
+      // Auto-dismiss after a second so it doesn't linger.
+      setTimeout(() => setHover(h => h?.hint ? null : h), 1100)
+    }
   }
 
   const handleBack = () => {
@@ -180,7 +193,11 @@ export default function KoreaMap({
           center={center}
           minZoom={1}
           maxZoom={6}
-          filterZoomEvent={evt => evt.type === 'click'}
+          // Disable ALL built-in pan/zoom interactions. Zoom is driven
+          // purely by React state (selectedProvince → useSpring → setZoom).
+          // This prevents stray click/wheel events from resetting the
+          // camera after a sub-region click.
+          filterZoomEvent={() => false}
         >
           <Geographies geography={PROVINCES_URL}>
             {({ geographies }) =>
@@ -193,7 +210,7 @@ export default function KoreaMap({
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
-                    onClick={() => handleProvinceClick(geo)}
+                    onClick={(e) => handleProvinceClick(geo, e)}
                     onMouseEnter={e =>
                       setHover({
                         x: e.clientX,
@@ -253,7 +270,7 @@ export default function KoreaMap({
             left: hover.x + 14,
             top: hover.y + 14,
             pointerEvents: 'none',
-            background: 'var(--sidebar-bg)',
+            background: hover.hint ? '#9CA3AF' : 'var(--sidebar-bg)',
             color: '#fff',
             padding: '6px 10px',
             borderRadius: 6,
@@ -268,6 +285,11 @@ export default function KoreaMap({
           {hover.count != null && (
             <span style={{ opacity: 0.75, marginLeft: 6 }}>
               · {hover.count}건
+            </span>
+          )}
+          {hover.hint && (
+            <span style={{ opacity: 0.85, marginLeft: 6 }}>
+              · {hover.hint}
             </span>
           )}
         </div>
@@ -361,7 +383,7 @@ function MunicipalityLayer({ topo, parentCode, subLookup, subColorScale, selecte
             <Geography
               key={geo.rsmKey}
               geography={geo}
-              onClick={() => onClick(geo)}
+              onClick={(e) => onClick(geo, e)}
               onMouseEnter={e => setHover({
                 x: e.clientX,
                 y: e.clientY,
