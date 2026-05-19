@@ -120,13 +120,20 @@ class _LegacySSLAdapter(HTTPAdapter):
         super().init_poolmanager(*args, **kwargs)
 
     def send(self, request, **kw):
-        kw.setdefault("verify", False)
+        # Force-override verify (not setdefault). requests.Session.send() passes
+        # the session's verify value (default True) into adapter.send() kwargs,
+        # so setdefault is a no-op and verification still runs — defeating the
+        # whole point of CERT_NONE in the SSLContext above. Korean gov sites
+        # routinely present self-signed or incomplete cert chains; for these
+        # PUBLIC-DATA scrapers we explicitly skip verification.
+        kw["verify"] = False
         return super().send(request, **kw)
 
 
 def _legacy_session() -> requests.Session:
     s = requests.Session()
     s.headers.update(DEFAULT_HEADERS)
+    s.verify = False  # belt-and-suspenders: also skip at the session layer
     adapter = _LegacySSLAdapter()
     s.mount("https://", adapter)
     s.mount("http://", adapter)
