@@ -40,8 +40,17 @@ def _scrape_jqgrid_once(
         ctx = browser.new_context(ignore_https_errors=True)
         page = ctx.new_page()
         try:
-            page.goto(source.source_url, wait_until="networkidle", timeout=30000)
-            page.wait_for_timeout(2000)
+            # 'load' instead of 'networkidle' — networkidle hangs in CI on
+            # gg.go.kr / calspia.go.kr because they pull resources from
+            # KR-only third-party hosts that never respond to non-KR IPs.
+            page.goto(source.source_url, wait_until="load", timeout=30000)
+            # Wait for jqGrid to actually render rows (data is loaded via
+            # AJAX after window.load). Falls back to a fixed timeout if no
+            # rows appear, so retry-on-empty wrap catches it.
+            try:
+                page.wait_for_selector("tr.jqgrow", timeout=8000)
+            except Exception:
+                page.wait_for_timeout(2000)
             rows = page.evaluate("""(() => {
                 const trs = document.querySelectorAll('tr.jqgrow');
                 return Array.from(trs).map(tr => Array.from(tr.querySelectorAll('td'))

@@ -33,8 +33,15 @@ def _scrape_playwright_table_once(
     link_col: int | None = None,
     require: str | None = None,
     listing_picker: Callable | None = None,
-    wait_until: str = "networkidle",
+    wait_until: str = "load",
+    settle_ms: int = 2000,
 ) -> list[Notice]:
+    """Default wait_until is 'load' (not 'networkidle') because Korean
+    gov sites often embed 3rd-party scripts (analytics, fonts) loaded
+    from KR-only hosts that hang from non-KR IPs, leaving networkidle
+    waiting forever. 'load' fires when the main window.load event
+    completes; settle_ms gives any post-load JS a moment to populate
+    the table."""
     from playwright.sync_api import sync_playwright
 
     with sync_playwright() as pw:
@@ -43,6 +50,8 @@ def _scrape_playwright_table_once(
         page = ctx.new_page()
         try:
             page.goto(source.source_url, wait_until=wait_until, timeout=30000)
+            if settle_ms > 0:
+                page.wait_for_timeout(settle_ms)
             html = page.content()
         finally:
             browser.close()
