@@ -8,10 +8,29 @@ import { supabase } from '../lib/supabase.js'
  *           byRegion: [{ region, total, byEntity: [{name, count}], latestAt }] }
  *
  * Fetches every notice in notices_v2 (no time filter) so per-org counts
- * match what NoticeList renders below — clicking an "X건" chip and
- * seeing X notices in the list right under it. With ~2k rows in the
- * table this is a single small query; the cap is 10000.
+ * match what NoticeList renders below.
+ *
+ * Supabase PostgREST defaults to a 1000-row server-side cap regardless
+ * of client .limit(). We page through with .range() — same pattern as
+ * scripts/prune_notices_v2.py.
  */
+const PAGE_SIZE = 1000
+
+async function fetchAllRows() {
+  const all = []
+  for (let start = 0; ; start += PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from('notices_v2')
+      .select('region,sub_entity,posted_at,scraped_at')
+      .range(start, start + PAGE_SIZE - 1)
+    if (error) throw error
+    if (!data || data.length === 0) break
+    all.push(...data)
+    if (data.length < PAGE_SIZE) break
+  }
+  return all
+}
+
 export default function useRegionInventory() {
   const [state, setState] = useState({
     status: 'loading',
@@ -22,17 +41,9 @@ export default function useRegionInventory() {
 
   useEffect(() => {
     let cancelled = false
-    supabase
-      .from('notices_v2')
-      .select('region,sub_entity,posted_at,scraped_at')
-      .limit(10000)
-      .then(({ data, error }) => {
+    fetchAllRows()
+      .then(rows => {
         if (cancelled) return
-        if (error) {
-          setState({ status: 'error', totalNotices: 0, latestAt: null, byRegion: [], error: error.message })
-          return
-        }
-        const rows = data || []
         // group by region
         const grouped = new Map()
         let latestAt = null
@@ -69,6 +80,16 @@ export default function useRegionInventory() {
           totalNotices: rows.length,
           latestAt,
           byRegion,
+        })
+      })
+      .catch(err => {
+        if (cancelled) return
+        setState({
+          status: 'error',
+          totalNotices: 0,
+          latestAt: null,
+          byRegion: [],
+          error: err?.message || String(err),
         })
       })
     return () => { cancelled = true }
