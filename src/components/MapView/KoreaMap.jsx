@@ -5,9 +5,9 @@ import { useSpring } from '@react-spring/web'
 import { ArrowLeft } from 'lucide-react'
 import { geoNameToRegion } from './regionNameMap.js'
 import { makeColorScale } from './colorScale.js'
+import { buildSubMatcher } from './nameMatcher.js'
 
 const PROVINCES_URL = `${import.meta.env.BASE_URL}data/skorea-provinces-topo.json`
-const MUNICIPALITIES_URL = `${import.meta.env.BASE_URL}data/skorea-municipalities-topo.json`
 
 // Projection tuned for South Korea — keeps the peninsula well-centered.
 const PROJECTION_CONFIG = { scale: 5500, center: [127.8, 36.0] }
@@ -38,14 +38,14 @@ export default function KoreaMap({
   countsBySub,
   selectedRegionName,
   selectedSubName,
+  muniData,
+  muniLoading,
   onPickRegion,
   onPickSub,
 }) {
   const containerRef = useRef(null)
   const [size, setSize] = useState({ w: 800, h: 600 })
   const [hover, setHover] = useState(null) // { x, y, label, count }
-  const [muniData, setMuniData] = useState(null)
-  const [muniLoading, setMuniLoading] = useState(false)
 
   // Animated camera state (driven by react-spring → React state, per-frame).
   const [zoom, setZoom] = useState(1)
@@ -66,16 +66,7 @@ export default function KoreaMap({
     return () => ro.disconnect()
   }, [])
 
-  // Lazy-load municipalities on first drill-in.
-  useEffect(() => {
-    if (!selectedRegionName || muniData || muniLoading) return
-    setMuniLoading(true)
-    fetch(MUNICIPALITIES_URL)
-      .then(r => r.json())
-      .then(json => setMuniData(json))
-      .catch(err => console.error('Failed to load municipalities:', err))
-      .finally(() => setMuniLoading(false))
-  }, [selectedRegionName, muniData, muniLoading])
+  // muniData is loaded + passed in by MapView when a region is selected.
 
   // When App's selected.region changes, clear the local province cache so
   // the next "found" lookup runs against the new region.
@@ -420,66 +411,4 @@ function MunicipalityLayer({ topo, parentCode, subLookup, subColorScale, selecte
   )
 }
 
-/**
- * Build a matcher from TopoJSON municipality names to v2 sub_entity names.
- * The two name spaces use different conventions:
- *   topo: `청주시상당구`, `중구`, `김해시`
- *   v2:   `청주시-상당구`, `대구시청`, `김해시`
- *
- * We index every v2 sub name with a handful of normalized variants
- * (lowercase, hyphen-stripped, suffix-stripped) so direct lookup is O(1).
- * Returns { counts, match(muniName) -> v2SubName | null }.
- */
-function buildSubMatcher(countsForRegion) {
-  const counts = countsForRegion || {}
-  const index = new Map() // normalizedKey -> v2SubName
-
-  for (const subName of Object.keys(counts)) {
-    for (const key of subVariants(subName)) {
-      if (!index.has(key)) index.set(key, subName)
-    }
-  }
-
-  return {
-    counts,
-    match(muniName) {
-      if (!muniName) return null
-      for (const key of muniVariants(muniName)) {
-        if (index.has(key)) return index.get(key)
-      }
-      return null
-    },
-  }
-}
-
-function subVariants(name) {
-  const v = new Set()
-  const norm = name.trim()
-  v.add(norm)
-  // Hyphen-stripped: 청주시-상당구 -> 청주시상당구
-  v.add(norm.replace(/-/g, ''))
-  // Strip city prefix: 청주시-상당구 -> 상당구
-  const m = norm.match(/^([가-힣]+시)-?([가-힣]+(?:구|군))$/)
-  if (m) v.add(m[2])
-  // Strip 시청/도청 suffix only.
-  // (Older code also tried `(시청|도청|구청|군청)$ -> 시` which
-  // incorrectly produced 경기시 from 경기도청 — removed.)
-  v.add(norm.replace(/시청$/u, '시'))
-  v.add(norm.replace(/도청$/u, '도'))
-  return Array.from(v).filter(Boolean)
-}
-
-function muniVariants(name) {
-  const v = new Set()
-  const norm = name.trim()
-  v.add(norm)
-  // For TopoJSON city-district names like 청주시상당구 / 용인시수지구 /
-  // 수원시영통구 (no separator between city and district):
-  const m = norm.match(/^([가-힣]+시)([가-힣]+(?:구|군))$/)
-  if (m) {
-    v.add(`${m[1]}-${m[2]}`) // hyphenated form for v2 match
-    v.add(m[2])              // bare district name
-    v.add(m[1])              // PARENT CITY — so 용인시수지구 also matches 용인시청 (v2)
-  }
-  return Array.from(v).filter(Boolean)
-}
+// Name matcher utilities live in ./nameMatcher.js (shared with MapView).
