@@ -168,10 +168,14 @@ function AttemptsPanel({ runId }) {
       setAttempts(null)
       return
     }
+    // Only fetch attempts that correspond to one of the official 88 sources
+    // (status 'ok' or 'failed'). 'skipped' entries are carry-over scraper
+    // modules whose URL isn't in regions.json — noise for this view.
     const { data, error } = await supabase
       .from('scrape_attempts')
       .select('*')
       .eq('run_id', runId)
+      .in('status', ['ok', 'failed'])
       .order('started_at', { ascending: true })
     if (error) setError(error.message)
     else setAttempts(data || [])
