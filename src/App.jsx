@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import regionsData from './data/regions.json'
 import Header from './components/Header.jsx'
 import RegionSidebar from './components/RegionSidebar.jsx'
@@ -6,6 +6,7 @@ import SourceCard from './components/SourceCard.jsx'
 import NoticeList from './components/NoticeList.jsx'
 import RecentFeed from './components/RecentFeed.jsx'
 import MapView from './components/MapView/MapView.jsx'
+import InventoryView from './components/InventoryView.jsx'
 import useViewMode from './hooks/useViewMode.js'
 
 export default function App() {
@@ -18,11 +19,22 @@ export default function App() {
     return r?.subEntities.find(s => s.name === selected.sub) ?? null
   }, [selected])
 
+  // Inventory card click → land in list view with that region selected
+  // (no sub-entity, so user sees the region's sources first).
+  const handleInventoryPick = useCallback(region => {
+    const r = regionsData.find(x => x.region === region)
+    const firstSub = r?.subEntities?.[0]?.name
+    if (firstSub) setSelected({ region, sub: firstSub })
+    setViewMode('list')
+  }, [setViewMode])
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Header viewMode={viewMode} setViewMode={setViewMode} />
       {viewMode === 'map' ? (
         <MapView />
+      ) : viewMode === 'inventory' ? (
+        <InventoryView onPick={handleInventoryPick} />
       ) : (
         <div
           style={{

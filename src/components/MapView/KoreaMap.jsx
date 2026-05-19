@@ -4,6 +4,10 @@ import { geoCentroid } from 'd3-geo'
 import { useSpring } from '@react-spring/web'
 import { ArrowLeft } from 'lucide-react'
 import { geoNameToRegion } from './regionNameMap.js'
+import { makeColorScale } from './colorScale.js'
+
+// Color used for provinces with zero notices — neutral gray, clearly "no data".
+const INACTIVE_FILL = '#E5E7EB'
 
 const PROVINCES_URL = `${import.meta.env.BASE_URL}data/skorea-provinces-topo.json`
 const MUNICIPALITIES_URL = `${import.meta.env.BASE_URL}data/skorea-municipalities-topo.json`
@@ -79,6 +83,14 @@ export default function KoreaMap({
   const selectedProvinceCode = selectedRegion?.code ?? null
   const showMunicipalities = !!selectedProvinceCode && !!muniData
 
+  // Build the count → color function once per render (cheap, but memo keeps
+  // the d3 scale stable across geography map iterations).
+  const maxCount = useMemo(
+    () => Object.values(countsByRegion).reduce((a, b) => Math.max(a, b), 0),
+    [countsByRegion],
+  )
+  const colorScale = useMemo(() => makeColorScale(maxCount), [maxCount])
+
   const handleProvinceClick = (geo) => {
     const regionName = geoNameToRegion(geo.properties.name)
     const centroid = geoCentroid(geo)
@@ -145,8 +157,10 @@ export default function KoreaMap({
                     onMouseLeave={() => setHover(null)}
                     style={{
                       default: {
-                        fill: count > 0 ? 'var(--accent)' : '#CFE0F4',
-                        fillOpacity: isOther ? 0.18 : countOpacity(count, countsByRegion),
+                        // count === 0 → neutral gray (clearly no data)
+                        // count > 0  → blue from interpolateBlues, intensity scaled by count
+                        fill: count > 0 ? colorScale(count) : INACTIVE_FILL,
+                        fillOpacity: isOther ? 0.35 : 1,
                         stroke: '#FFFFFF',
                         strokeWidth: 0.8,
                         outline: 'none',
@@ -154,8 +168,8 @@ export default function KoreaMap({
                         cursor: 'pointer',
                       },
                       hover: {
-                        fill: 'var(--primary-mid)',
-                        fillOpacity: isOther ? 0.35 : 0.95,
+                        fill: count > 0 ? 'var(--primary-mid)' : '#CFD3DA',
+                        fillOpacity: isOther ? 0.5 : 1,
                         stroke: '#FFFFFF',
                         strokeWidth: 1,
                         outline: 'none',
@@ -256,13 +270,6 @@ export default function KoreaMap({
       )}
     </div>
   )
-}
-
-function countOpacity(count, countsByRegion) {
-  const max = Object.values(countsByRegion).reduce((a, b) => Math.max(a, b), 0)
-  if (max === 0) return 0.35
-  const t = count / max
-  return 0.35 + t * 0.55
 }
 
 function MunicipalityLayer({ topo, parentCode, onSelect, setHover }) {

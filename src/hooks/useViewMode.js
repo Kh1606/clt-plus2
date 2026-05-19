@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 
 const STORAGE_KEY = 'clt-plus.viewMode'
-const VALID = new Set(['list', 'map'])
+const VALID = new Set(['list', 'map', 'inventory'])
 
 function readInitial() {
   if (typeof window === 'undefined') return 'list'
