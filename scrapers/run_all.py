@@ -130,6 +130,7 @@ SCRAPERS = [
     # 경상북도 (9 of 38 — most are JS-rendered portal/saeol or open_content)
     "scrapers.gyeongsangbuk.gyeongbuk_batch",
     "scrapers.gyeongsangbuk.bukbu_construction",
+    "scrapers.gyeongsangbuk.gbgs",
     # 경상남도 (9 of 32 static + 21 .web Playwright)
     "scrapers.gyeongsangnam.gyeongnam_batch",
     "scrapers.gyeongsangnam.gyeongnam_web_batch",

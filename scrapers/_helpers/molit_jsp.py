@@ -28,7 +28,14 @@ from scrapers.base import Notice, SourceMeta, get, soup, parse_date, clean
 
 
 def scrape_molit_jsp(source: SourceMeta) -> list[Notice]:
-    r = get(source.source_url)
+    # molit.go.kr throttles cold AWS IPs; warm via the host root first.
+    try:
+        from scrapers._helpers.session_warmup import warmed_get
+        from urllib.parse import urlsplit
+        root = "{}://{}".format(*urlsplit(source.source_url)[:2])
+        r = warmed_get(source.source_url, warmup=root)
+    except Exception:
+        r = get(source.source_url)
     s = soup(r.content)
     table = s.find("table")
     if not table:

@@ -6,7 +6,7 @@ detail URL: /portal/biz/bbs/layout1/selectBoardArticle.do?bbsId=...&nttId=ID.
 """
 import re
 from urllib.parse import urljoin
-from scrapers.base import Notice, SourceMeta, get, soup, clean, parse_date
+from scrapers.base import Notice, SourceMeta, get, soup, clean, parse_date, _legacy_session
 
 _SRC = SourceMeta(
     region="공사", sub_entity="한국도로공사", source_page="메인페이지",
@@ -18,7 +18,21 @@ _ID_RE = re.compile(r"fn_egov_inqire_notice\('(\d+)'\)")
 
 
 def _scrape():
-    r = get(_FETCH_URL)
+    # ex.co.kr's BBSMSTR list 401s without a valid session — warm up by
+    # visiting the homepage first to set egov session cookies.
+    import requests
+    sess = requests.Session()
+    sess.headers.update({
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
+        "Accept-Language": "ko-KR,ko;q=0.9",
+    })
+    try:
+        sess.get("https://www.ex.co.kr/", timeout=20, verify=False)
+    except Exception:
+        pass
+    headers = {"Referer": "https://www.ex.co.kr/"}
+    r = sess.get(_FETCH_URL, timeout=30, verify=False, headers=headers)
+    r.raise_for_status()
     s = soup(r.text)
     notices: list[Notice] = []
     seen: set[str] = set()

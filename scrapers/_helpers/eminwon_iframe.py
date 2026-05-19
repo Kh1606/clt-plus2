@@ -178,3 +178,38 @@ def make_eminwon_iframe_scrape(source: SourceMeta):
     def _scrape():
         return scrape_eminwon_iframe(source)
     return _scrape
+
+
+def scrape_eminwon_direct(source: SourceMeta, eminwon_origin: str) -> list[Notice]:
+    """Skip the parent page and go straight to the eminwon JSP with the
+    explicit not_ancmt_se_code filter. More reliable when the parent's
+    iframe load is flaky (e.g. asan, seosan). Retries 2x on empty result."""
+    import time as _t
+    for attempt in range(3):
+        notices = _scrape_eminwon_direct_once(source, eminwon_origin)
+        if notices:
+            return notices
+        if attempt < 2:
+            _t.sleep(2 * (attempt + 1))
+    return []
+
+
+def _scrape_eminwon_direct_once(source: SourceMeta, eminwon_origin: str) -> list[Notice]:
+    from playwright.sync_api import sync_playwright
+    list_url = eminwon_origin + LIST_PATH
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(headless=True)
+        ctx = browser.new_context(ignore_https_errors=True)
+        page = ctx.new_page()
+        try:
+            page.goto(list_url, wait_until="networkidle", timeout=30000)
+            html = page.content()
+        finally:
+            browser.close()
+    return _extract_rows(html, source, eminwon_origin)
+
+
+def make_eminwon_direct_scrape(source: SourceMeta, eminwon_origin: str):
+    def _scrape():
+        return scrape_eminwon_direct(source, eminwon_origin)
+    return _scrape

@@ -8,7 +8,8 @@ Detail link is a relative href that starts with `?`: ?bcIdx=125&MODE=V&bidx=...
 from __future__ import annotations
 from urllib.parse import urljoin
 
-from scrapers.base import Notice, SourceMeta, get, soup, parse_date, clean
+from scrapers.base import Notice, SourceMeta, soup, parse_date, clean
+from scrapers._helpers.session_warmup import warmed_get
 
 SOURCE = SourceMeta(
     region="부산광역시",
@@ -19,7 +20,8 @@ SOURCE = SourceMeta(
 
 
 def scrape() -> list[Notice]:
-    r = get(SOURCE.source_url)
+    # bisco.or.kr rejects cold requests from CI; warmup with homepage visit.
+    r = warmed_get(SOURCE.source_url, warmup="https://www.bisco.or.kr/")
     s = soup(r.content)
     table = s.find("table")
     if not table:

@@ -213,13 +213,8 @@ SCRAPERS = [
     _entry("영주시", "고시공고",
            "https://www.yeongju.go.kr/open_content/main/page.do?mnu_uid=10619&boardType=notice",
            require="not_ancmt_mgt_no="),
-    # 경북개발공사 — open_content CMS, parm_bod_uid= detail links, title col 1
-    _entry("경북개발공사", "공지사항",
-           "https://www.gbgs.go.kr/open_content/ko/page.do?mnu_uid=2159",
-           require="parm_bod_uid="),
-    _entry("경북개발공사", "고시공고",
-           "https://www.gbgs.go.kr/open_content/ko/page.do?mnu_uid=2160&",
-           require="parm_bod_uid="),
+    # 경북개발공사 (gbgs.go.kr) — moved to dedicated module gbgs.py with
+    # warmup + retry-on-empty (server returns empty page ~50% of cold hits).
     # 군위군 (gunwi.go.kr) — 공지 bod_uid=, 고시 not_ancmt_mgt_no=
     _entry("군위군", "공지사항",
            "https://gunwi.go.kr/ko/page.do?mnu_uid=101&",
