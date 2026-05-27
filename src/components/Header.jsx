@@ -42,7 +42,7 @@ export default function Header({ viewMode, setViewMode }) {
         </span>
         <div>
           <div style={{ fontSize: 16, fontWeight: 700, lineHeight: 1.1 }}>
-            CLT+
+            NoticeHub
           </div>
           <div style={{ fontSize: 12, opacity: 0.75 }}>
             공공기관 공지사항 통합 뷰어

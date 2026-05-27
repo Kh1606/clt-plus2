@@ -73,7 +73,7 @@ export default function LoginPage() {
           <div>
             <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>관리자 로그인</h1>
             <div style={{ fontSize: 12, color: 'var(--text-muted, #6B7280)' }}>
-              CLT+ Admin
+              NoticeHub Admin
             </div>
           </div>
         </div>

@@ -50,7 +50,7 @@ export default function AdminLayout() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 6px 14px' }}>
           <Shield size={18} />
           <div>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>CLT+ Admin</div>
+            <div style={{ fontWeight: 700, fontSize: 14 }}>NoticeHub Admin</div>
             <div style={{ fontSize: 11, opacity: 0.7 }}>{user?.email}</div>
           </div>
         </div>
